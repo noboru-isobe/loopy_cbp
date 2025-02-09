@@ -68,6 +68,12 @@ class DiscreteGraph(BaseGraph):
         super().bake()
         self.__cal_node_coef(self.get_root())
 
+    def bake_loopy(self):
+        super().bake()
+        for node in self.nodes:
+            self.__cal_node_coef(node)
+            node.cal_cnp_coef()  # Ensure cal_cnp_coef is called for all nodes
+
     def __cal_node_coef(self, node):
         for _node in self.nodes:
             setattr(_node, 'is_traversed', False)

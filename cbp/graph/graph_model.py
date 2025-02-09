@@ -34,11 +34,21 @@ class GraphModel(DiscreteGraph):
         self.bake()
         return self.norm_product_bp()
 
+    def run_loopy_cnp(self):
+        self.bake_loopy()
+        return self.norm_product_bp()
+
     def run_bp(self):
         if self.coef_policy != bp_policy:  # pylint: disable=comparison-with-callable
             self.coef_policy = bp_policy
         self.bake()
         return self.itsbp()
+
+    def run_loopy_bp(self, max_iter=100):
+        if self.coef_policy != bp_policy:  # pylint: disable=comparison-with-callable
+            self.coef_policy = bp_policy
+        self.bake_loopy()
+        return self.itsbp(max_iter=max_iter)
 
     def norm_product_bp(self, error_fun=None):
         if error_fun is None:
@@ -71,7 +81,7 @@ class GraphModel(DiscreteGraph):
 
         return epsilons, step, timer
 
-    def itsbp(self):
+    def itsbp(self, max_iter=5000000):
         """run sinkhorn or iterative scaling inference
 
         :return: [description]
@@ -81,7 +91,8 @@ class GraphModel(DiscreteGraph):
         return self.engine_loop(self.itsbp_outer_loop,
                                 tolerance=self.cfg.itsbp_outer_tolerance,
                                 error_fun=diff_max_marginals,
-                                isoutput=self.cfg.verbose_itsbp_outer)
+                                isoutput=self.cfg.verbose_itsbp_outer,
+                                max_iter=max_iter)
 
     def its_next_looplink(self):
         target_node = self.leaf_nodes[self.itsbp_outer_cnt]
